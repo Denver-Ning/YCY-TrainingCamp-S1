@@ -28,14 +28,14 @@ class BrakeBanner {
     });
   }
   show() {
+    // return
+    // 按钮
     let actionButton = this.createActionButton();
     actionButton.x = 420;
     actionButton.y = 320;
 
-    // 创建车容器
+    // 车体
     const bikeContainer = new PIXI.Container();
-    this.stage.addChild(bikeContainer);
-
     // 加载刹车把手
     const bikeLeverImage = new PIXI.Sprite(
       this.loader.resources["brake_lever.png"].texture
@@ -56,8 +56,15 @@ class BrakeBanner {
       this.loader.resources["brake_handlerbar.png"].texture
     );
     bikeContainer.addChild(bikeHandlerbarImage, bikeImage);
+    this.stage.addChild(bikeContainer);
 
     this.stage.addChild(actionButton);
+    const resize = () => {
+      bikeContainer.x = window.innerWidth - bikeContainer.width;
+      bikeContainer.y = window.innerHeight - bikeContainer.height;
+    };
+    resize();
+    window.addEventListener("resize", resize);
     actionButton.interactive = true; // 设置按钮可交互
     actionButton.buttonMode = true; // 小手模式
 
@@ -68,19 +75,13 @@ class BrakeBanner {
         duration: 0.3,
         rotation: (Math.PI / 180) * -30,
       });
-      pause()
+      pause();
     });
     actionButton.on("mouseup", () => {
       // bikeLeverImage.rotation = 0;
       gsap.to(bikeLeverImage, { duration: 0.3, rotation: 0 });
-      start()
+      start();
     });
-    const resize = () => {
-      bikeContainer.x = window.innerWidth - bikeContainer.width;
-      bikeContainer.y = window.innerHeight - bikeContainer.height;
-    };
-    resize();
-    window.addEventListener("resize", resize);
 
     // 创建粒子
     let particleContainer = new PIXI.Container();
@@ -92,7 +93,7 @@ class BrakeBanner {
     particleContainer.x = window.innerWidth / 2;
     particleContainer.y = window.innerHeight / 2;
 
-    particleContainer.rotation = 35 * Math.PI / 180;
+    particleContainer.rotation = (35 * Math.PI) / 180;
     let particles = [];
     let colors = [0xf1cf54, 0xb5cea8, 0xf1cf54, 0x818e9b];
     for (let i = 0; i < 20; i++) {
@@ -103,7 +104,7 @@ class BrakeBanner {
       let pItem = {
         sx: Math.random() * window.innerWidth,
         sy: Math.random() * window.innerHeight,
-        gr:gr
+        gr: gr,
       };
       gr.x = pItem.sx;
       gr.y = pItem.sy;
@@ -113,35 +114,66 @@ class BrakeBanner {
     let speed = 0; // 速度
     function loop() {
       // 持续运动
-      speed += .5;
-      speed = Math.min(speed,20)
-      for(let i = 0; i < particles.length; i++) {
+      speed += 0.5;
+      speed = Math.min(speed, 20);
+      for (let i = 0; i < particles.length; i++) {
         let pItem = particles[i];
         pItem.gr.y += speed;
-        if(speed>=20){
+        // pItem.gr.rotation += 0.1;
+        if (speed >= 20) {
           pItem.gr.scale.y = 20;
           pItem.gr.scale.x = 0.07;
         }
-        if(pItem.gr.y > window.innerHeight) {
+        if (pItem.gr.y > window.innerHeight) {
           pItem.gr.y = Math.random() * window.innerHeight;
-        } 
+        }
       }
     }
     function start() {
-      speed = 0
+      speed = 0;
       gsap.ticker.add(loop);
+      gsap.to(bikeImage, {
+        duration: 0.3,
+        y: 0,
+        alpha:1,
+      });
+      gsap.to(bikeHandlerbarImage, {
+        y: 0,
+        duration: 0.3,
+      });
+      gsap.to(bikeLeverImage, {
+        y: 900,
+        duration: 0.3,
+      });
     }
     function pause() {
       gsap.ticker.remove(loop);
-
-      for(let i = 0; i < particles.length; i++) {
+      for (let i = 0; i < particles.length; i++) {
         let pItem = particles[i];
 
         pItem.gr.scale.y = 1;
         pItem.gr.scale.x = 1;
 
-        gsap.to(pItem.gr,{duration:.6,x:pItem.sx,y:pItem.sy,ease:'elastic.out'})
+        gsap.to(pItem.gr, {
+          duration: 0.6,
+          x: pItem.sx,
+          y: pItem.sy,
+          ease: "elastic.out",
+        });
       }
+      gsap.to(bikeLeverImage, {
+        y: 1000,
+        duration: 0.3,
+      });
+      gsap.to(bikeImage, {
+        duration: 0.3,
+        alpha: 0.2,
+        y: 100,
+      });
+      gsap.to(bikeHandlerbarImage, {
+        y: 100,
+        duration: 0.3,
+      });
     }
     start();
     // 粒子有多个颜色
